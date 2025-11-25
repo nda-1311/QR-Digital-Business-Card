@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/QR-Digital-Business-Card/static/css/main.c9acb19c.css",
+    "main.js": "/QR-Digital-Business-Card/static/js/main.d3431c31.js",
+    "index.html": "/QR-Digital-Business-Card/index.html",
+    "main.c9acb19c.css.map": "/QR-Digital-Business-Card/static/css/main.c9acb19c.css.map",
+    "main.d3431c31.js.map": "/QR-Digital-Business-Card/static/js/main.d3431c31.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c9acb19c.css",
+    "static/js/main.d3431c31.js"
+  ]
+}
