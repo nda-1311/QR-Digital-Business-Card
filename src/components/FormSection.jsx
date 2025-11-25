@@ -10,6 +10,9 @@ import {
   FaGlobe,
 } from "react-icons/fa";
 
+// ImgBB API key - Lấy miễn phí tại https://api.imgbb.com/
+const IMGBB_API_KEY = "04e743b6a852193748beead46b2701be";
+
 const FormSection = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -23,6 +26,7 @@ const FormSection = ({ onSubmit }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const [uploading, setUploading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,18 +43,95 @@ const FormSection = ({ onSubmit }) => {
     }
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
+      setUploading(true);
+
+      // Kiểm tra kích thước file (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Ảnh quá lớn! Vui lòng chọn ảnh nhỏ hơn 5MB.");
+        setUploading(false);
+        return;
+      }
+
+      try {
+        // Upload lên ImgBB
+        const formData = new FormData();
+        formData.append("image", file);
+
+        const response = await fetch(
+          `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Lưu URL của ảnh thay vì base64
+          setFormData((prev) => ({
+            ...prev,
+            avatar: data.data.url,
+          }));
+        } else {
+          // Nếu upload thất bại, dùng base64 thay thế (fallback)
+          console.error("ImgBB upload failed, using base64 fallback");
+          convertToBase64Fallback(file);
+        }
+      } catch (error) {
+        console.error("Error uploading to ImgBB:", error);
+        // Fallback: Dùng base64
+        convertToBase64Fallback(file);
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
+
+  // Fallback: Resize và lưu base64 nếu upload cloud thất bại
+  const convertToBase64Fallback = (file) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_SIZE = 150;
+
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Nén ảnh với chất lượng thấp
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.5);
+
         setFormData((prev) => ({
           ...prev,
-          avatar: reader.result,
+          avatar: compressedBase64,
         }));
       };
-      reader.readAsDataURL(file);
-    }
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   const validateForm = () => {
@@ -179,15 +260,21 @@ const FormSection = ({ onSubmit }) => {
                 </div>
               )}
               <label className="cursor-pointer bg-gradient-to-r from-primary to-secondary text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300">
-                Chọn Ảnh
+                {uploading ? "Đang upload..." : "Chọn Ảnh"}
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
                   className="hidden"
+                  disabled={uploading}
                 />
               </label>
             </div>
+            {uploading && (
+              <p className="text-sm text-primary mt-2">
+                ⏳ Đang tải ảnh lên cloud...
+              </p>
+            )}
           </div>
 
           {/* Form Fields */}

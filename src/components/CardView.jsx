@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { QRCodeCanvas } from "qrcode.react";
+import LZString from "lz-string";
 import {
   FaFacebook,
   FaLinkedin,
@@ -15,24 +16,26 @@ const CardView = () => {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    // Decode dữ liệu từ URL query parameter
-    const decodeCardData = (encoded) => {
+    // Decode và GIẢI NÉN dữ liệu từ URL hash fragment
+    const decodeCardData = (compressed) => {
       try {
-        const decoded = decodeURIComponent(atob(encoded));
-        return JSON.parse(decoded);
+        // Giải nén bằng lz-string
+        const decompressed =
+          LZString.decompressFromEncodedURIComponent(compressed);
+        if (!decompressed) return null;
+        return JSON.parse(decompressed);
       } catch (error) {
         console.error("Error decoding card data:", error);
         return null;
       }
     };
 
-    // Lấy data từ URL query parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const encodedData = urlParams.get('data');
-    
-    if (encodedData) {
-      // Ưu tiên dữ liệu từ URL
-      const decodedData = decodeCardData(encodedData);
+    // Lấy data từ hash fragment
+    const hash = window.location.hash.substring(1); // Bỏ ký tự #
+
+    if (hash) {
+      // Ưu tiên dữ liệu từ URL hash
+      const decodedData = decodeCardData(hash);
       if (decodedData) {
         setCardData(decodedData);
         // Lưu vào localStorage cho lần sau

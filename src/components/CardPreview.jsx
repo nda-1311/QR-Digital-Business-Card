@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import html2canvas from "html2canvas";
+import LZString from "lz-string";
 import {
   FaFacebook,
   FaLinkedin,
@@ -17,7 +18,6 @@ const CardPreview = ({ cardData }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [copied, setCopied] = useState(false);
   const [cardId, setCardId] = useState("");
-  const [isDownloading, setIsDownloading] = useState(false);
   const cardRef = useRef(null);
 
   // Tạo ID duy nhất và lưu vào localStorage
@@ -26,26 +26,28 @@ const CardPreview = ({ cardData }) => {
       cardData.name.replace(/\s+/g, "-").toLowerCase() + "-" + Date.now();
     setCardId(id);
 
-    // Lưu vào localStorage (backup)
+    // Lưu TOÀN BỘ dữ liệu vào localStorage
     const savedCards = localStorage.getItem("businessCards");
     const cards = savedCards ? JSON.parse(savedCards) : {};
     cards[id] = cardData;
     localStorage.setItem("businessCards", JSON.stringify(cards));
   }, [cardData]);
 
-  // Encode dữ liệu vào URL để chia sẻ được
+  // Encode dữ liệu - GIỮ CẢ AVATAR (đã được resize/nén nhỏ)
   const encodeCardData = (data) => {
     const jsonString = JSON.stringify(data);
-    return btoa(encodeURIComponent(jsonString));
+    // Nén bằng lz-string
+    const compressed = LZString.compressToEncodedURIComponent(jsonString);
+    return compressed;
   };
 
-  // Generate unique URL for the card với dữ liệu được encode
-  const cardUrl = `${window.location.origin}/QR-Digital-Business-Card/card/${cardId}?data=${encodeCardData(cardData)}`;
+  // Generate URL với dữ liệu được nén trong hash fragment
+  const cardUrl = `${
+    window.location.origin
+  }/QR-Digital-Business-Card/card/${cardId}#${encodeCardData(cardData)}`;
 
   const downloadCard = async () => {
     if (cardRef.current) {
-      setIsDownloading(true);
-
       // Đảm bảo fonts đã load xong
       await document.fonts.ready;
       await new Promise((resolve) => setTimeout(resolve, 200));
@@ -95,8 +97,6 @@ const CardPreview = ({ cardData }) => {
         .toLowerCase()}.png`;
       link.href = canvas.toDataURL("image/png", 1.0);
       link.click();
-
-      setIsDownloading(false);
     }
   };
 
