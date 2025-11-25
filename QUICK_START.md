@@ -1,16 +1,19 @@
 # 🚀 HƯỚNG DẪN CHẠY NHANH
 
 ## Bước 1: Cài Đặt Dependencies
+
 \`\`\`bash
 npm install
 \`\`\`
 
 ## Bước 2: Chạy Development Server
+
 \`\`\`bash
 npm start
 \`\`\`
 
 ## Bước 3: Mở Trình Duyệt
+
 Truy cập: **http://localhost:3000**
 
 ---
@@ -28,18 +31,23 @@ Truy cập: **http://localhost:3000**
 ## 🐛 Troubleshooting
 
 ### Lỗi: "Cannot find module"
+
 \`\`\`bash
 rm -rf node_modules package-lock.json
 npm install
 \`\`\`
 
 ### Lỗi: Port 3000 đã được sử dụng
+
 \`\`\`bash
+
 # Thay đổi port
+
 PORT=3001 npm start
 \`\`\`
 
 ### Lỗi: Tailwind CSS không load
+
 \`\`\`bash
 npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
 \`\`\`
