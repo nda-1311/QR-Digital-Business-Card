@@ -17,13 +17,15 @@ const CardPreview = ({ cardData }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [copied, setCopied] = useState(false);
   const [cardId, setCardId] = useState("");
+  const [isDownloading, setIsDownloading] = useState(false);
   const cardRef = useRef(null);
 
   // Tạo ID duy nhất và lưu vào localStorage
   useEffect(() => {
-    const id = cardData.name.replace(/\s+/g, "-").toLowerCase() + "-" + Date.now();
+    const id =
+      cardData.name.replace(/\s+/g, "-").toLowerCase() + "-" + Date.now();
     setCardId(id);
-    
+
     // Lưu vào localStorage
     const savedCards = localStorage.getItem("businessCards");
     const cards = savedCards ? JSON.parse(savedCards) : {};
@@ -36,17 +38,59 @@ const CardPreview = ({ cardData }) => {
 
   const downloadCard = async () => {
     if (cardRef.current) {
+      setIsDownloading(true);
+
+      // Đảm bảo fonts đã load xong
+      await document.fonts.ready;
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
       const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: null,
-        scale: 2,
+        backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        windowWidth: cardRef.current.scrollWidth,
+        windowHeight: cardRef.current.scrollHeight,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.querySelector("[data-card-ref]");
+          if (clonedElement) {
+            clonedElement.style.transform = "none";
+            clonedElement.style.transition = "none";
+
+            // Thay thế icons bằng text symbols để render tốt hơn
+            const emailIcon = clonedElement.querySelector(
+              '[data-icon="email"]'
+            );
+            const phoneIcon = clonedElement.querySelector(
+              '[data-icon="phone"]'
+            );
+
+            if (emailIcon) {
+              emailIcon.innerHTML = "✉";
+              emailIcon.style.fontFamily = "Arial, sans-serif";
+              emailIcon.style.fontSize = "18px";
+              emailIcon.style.lineHeight = "20px";
+            }
+
+            if (phoneIcon) {
+              phoneIcon.innerHTML = "☎";
+              phoneIcon.style.fontFamily = "Arial, sans-serif";
+              phoneIcon.style.fontSize = "18px";
+              phoneIcon.style.lineHeight = "20px";
+            }
+          }
+        },
       });
 
       const link = document.createElement("a");
       link.download = `business-card-${cardData.name
         .replace(/\s+/g, "-")
         .toLowerCase()}.png`;
-      link.href = canvas.toDataURL();
+      link.href = canvas.toDataURL("image/png", 1.0);
       link.click();
+
+      setIsDownloading(false);
     }
   };
 
@@ -104,6 +148,7 @@ const CardPreview = ({ cardData }) => {
           <div className="flex justify-center animate-slide-up">
             <div
               ref={cardRef}
+              data-card-ref
               className={`w-full max-w-md rounded-card p-8 shadow-card-hover transform hover:scale-103 transition-all duration-500 ${
                 isDarkMode
                   ? "bg-gradient-to-br from-gray-800 to-gray-900 text-white"
@@ -123,7 +168,7 @@ const CardPreview = ({ cardData }) => {
                     {cardData.name.charAt(0).toUpperCase()}
                   </div>
                 )}
-                <div>
+                <div className="flex-1">
                   <h3 className="text-2xl font-bold mb-1">{cardData.name}</h3>
                   <p className={isDarkMode ? "text-gray-300" : "text-gray-600"}>
                     {cardData.position}
@@ -133,13 +178,57 @@ const CardPreview = ({ cardData }) => {
 
               {/* Contact Info */}
               <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-3">
-                  <FaEnvelope className="text-primary" />
-                  <span className="text-sm">{cardData.email}</span>
+                <div
+                  className="flex items-center gap-3"
+                  style={{ alignItems: "center" }}
+                >
+                  <div
+                    data-icon="email"
+                    className="w-5 h-5 flex items-center justify-center flex-shrink-0 text-primary"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "20px",
+                      height: "20px",
+                      color: "#7ACFF5",
+                    }}
+                  >
+                    <FaEnvelope
+                      style={{ fontSize: "16px", display: "block" }}
+                    />
+                  </div>
+                  <span
+                    className="text-sm leading-5"
+                    style={{ lineHeight: "20px", fontSize: "14px" }}
+                  >
+                    {cardData.email}
+                  </span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <FaPhone className="text-primary" />
-                  <span className="text-sm">{cardData.phone}</span>
+                <div
+                  className="flex items-center gap-3"
+                  style={{ alignItems: "center" }}
+                >
+                  <div
+                    data-icon="phone"
+                    className="w-5 h-5 flex items-center justify-center flex-shrink-0 text-primary"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "20px",
+                      height: "20px",
+                      color: "#7ACFF5",
+                    }}
+                  >
+                    <FaPhone style={{ fontSize: "16px", display: "block" }} />
+                  </div>
+                  <span
+                    className="text-sm leading-5"
+                    style={{ lineHeight: "20px", fontSize: "14px" }}
+                  >
+                    {cardData.phone}
+                  </span>
                 </div>
               </div>
 
@@ -151,9 +240,9 @@ const CardPreview = ({ cardData }) => {
                       href={cardData.facebook}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white hover:scale-110 transition-transform duration-300"
+                      className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white hover:scale-110 transition-transform duration-300"
                     >
-                      <FaFacebook />
+                      <FaFacebook className="text-xl" />
                     </a>
                   )}
                   {cardData.linkedin && (
@@ -161,9 +250,9 @@ const CardPreview = ({ cardData }) => {
                       href={cardData.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white hover:scale-110 transition-transform duration-300"
+                      className="w-12 h-12 rounded-full bg-blue-700 flex items-center justify-center text-white hover:scale-110 transition-transform duration-300"
                     >
-                      <FaLinkedin />
+                      <FaLinkedin className="text-xl" />
                     </a>
                   )}
                   {cardData.website && (
@@ -171,9 +260,9 @@ const CardPreview = ({ cardData }) => {
                       href={cardData.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white hover:scale-110 transition-transform duration-300"
+                      className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white hover:scale-110 transition-transform duration-300"
                     >
-                      <FaGlobe />
+                      <FaGlobe className="text-xl" />
                     </a>
                   )}
                 </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { QRCodeCanvas } from "qrcode.react";
 import {
   FaFacebook,
@@ -40,12 +40,12 @@ const CardView = () => {
           <p className="text-gray-600 mb-8">
             Danh thiếp này không tồn tại hoặc đã bị xóa.
           </p>
-          <a
-            href="/"
+          <Link
+            to="/"
             className="bg-gradient-to-r from-primary to-secondary text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
           >
             Tạo Danh Thiếp Mới
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -158,12 +158,12 @@ const CardView = () => {
 
           {/* Back to Home */}
           <div className="mt-8 text-center">
-            <a
-              href="/"
+            <Link
+              to="/"
               className="inline-block bg-gradient-to-r from-primary to-secondary text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
             >
               Tạo Danh Thiếp Của Bạn
-            </a>
+            </Link>
           </div>
         </div>
       </div>

@@ -135,21 +135,25 @@ qr-business-card/
 ## 🌟 Tính Năng Nổi Bật
 
 ### QR Code Thực Tế
+
 - QR code có thể quét bằng camera điện thoại
 - Mỗi card có QR riêng biệt
 - Tự động redirect đến trang card khi quét
 
 ### Dynamic Routing
+
 - React Router cho SPA routing
 - Deep linking hỗ trợ trên GitHub Pages
 - URL sharing cho mỗi danh thiếp
 
 ### LocalStorage
+
 - Lưu trữ dữ liệu card tự động
 - Không cần backend/database
 - Dữ liệu persistent trên trình duyệt
 
 ### Animations
+
 - Fade-in effects
 - Slide-up animations
 - Hover transformations
