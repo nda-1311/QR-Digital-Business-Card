@@ -65,25 +65,25 @@ File build sẽ được tạo trong thư mục \`build/\`
 
 ## 📂 Cấu Trúc Dự Án
 
-\`\`\`
+```
 qr-business-card/
 ├── public/
-│ ├── index.html # HTML template
-│ └── manifest.json # PWA manifest
+│   ├── index.html          # HTML template
+│   └── manifest.json       # PWA manifest
 ├── src/
-│ ├── components/
-│ │ ├── Hero.jsx # Hero section
-│ │ ├── Features.jsx # Features section
-│ │ ├── FormSection.jsx # Form nhập liệu
-│ │ ├── CardPreview.jsx # Preview & Export
-│ │ └── Footer.jsx # Footer
-│ ├── App.js # Component chính
-│ ├── index.js # Entry point
-│ └── index.css # Tailwind CSS
-├── tailwind.config.js # Cấu hình Tailwind
-├── postcss.config.js # Cấu hình PostCSS
-└── package.json # Dependencies
-\`\`\`
+│   ├── components/
+│   │   ├── Hero.jsx        # Hero section
+│   │   ├── Features.jsx    # Features section
+│   │   ├── FormSection.jsx # Form nhập liệu
+│   │   ├── CardPreview.jsx # Preview & Export
+│   │   └── Footer.jsx      # Footer
+│   ├── App.js              # Component chính
+│   ├── index.js            # Entry point
+│   └── index.css           # Tailwind CSS
+├── tailwind.config.js      # Cấu hình Tailwind
+├── postcss.config.js       # Cấu hình PostCSS
+└── package.json            # Dependencies
+```
 
 ## 🎨 Palette Màu
 
