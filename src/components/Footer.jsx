@@ -88,7 +88,8 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-700 pt-8 text-center text-gray-400">
           <p className="flex items-center justify-center gap-2">
-            Made with <FaHeart className="text-red-500" /> by Nguyễn Đức Anh © 2024
+            Made with <FaHeart className="text-red-500" /> by Nguyễn Đức Anh ©
+            2024
           </p>
           <p className="mt-2 text-sm">Miễn phí 100% - Không giới hạn sử dụng</p>
         </div>

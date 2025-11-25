@@ -4,7 +4,7 @@
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![React](https://img.shields.io/badge/React-19.2.0-61dafb.svg)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1.17-38bdf8.svg)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.1-38bdf8.svg)
 
 ## ✨ Tính Năng
 
@@ -34,10 +34,10 @@
 
 ### Bước 1: Clone Dự Án
 
-\`\`\`bash
-git clone https://github.com/yourusername/qr-business-card.git
-cd qr-business-card
-\`\`\`
+```bash
+git clone https://github.com/nda-1311/QR-Digital-Business-Card.git
+cd QR-Digital-Business-Card
+```
 
 ### Bước 2: Cài Đặt Dependencies
 
@@ -51,7 +51,9 @@ npm install
 npm start
 \`\`\`
 
-Mở trình duyệt tại: \`http://localhost:3000\`
+Mở trình duyệt tại: `http://localhost:3000`
+
+**Demo trực tiếp:** [http://localhost:3000](http://localhost:3000)
 
 ### Bước 4: Build Production
 
@@ -85,10 +87,11 @@ qr-business-card/
 
 ## 🎨 Palette Màu
 
-- **Primary**: #7ACFF5 (Xanh pastel)
-- **Secondary**: #C8B6FF (Tím nhạt)
-- **Accent**: #F5F5F5 (Trắng)
+- **Primary**: #4F46E5 (Indigo)
+- **Secondary**: #7C3AED (Purple)
+- **Accent**: #F3F4F6 (Trắng xám)
 - **Text**: #1F2937 (Xám đậm)
+- **Background**: Gradient xám nhẹ nhàng
 
 ## 🚀 Hướng Dẫn Sử Dụng
 
@@ -125,7 +128,10 @@ MIT License - Sử dụng miễn phí cho mọi mục đích
 
 ## 👨‍💻 Tác Giả
 
-QR Business Card Team
+**Nguyễn Đức Anh**
+
+- 📧 Email: 1dap2xoe@gmail.com
+- 📱 Phone: 0358102981
 
 ## 🤝 Đóng Góp
 
@@ -133,9 +139,10 @@ Mọi đóng góp đều được chào đón! Hãy tạo Pull Request hoặc Is
 
 ## 📧 Liên Hệ
 
-- Email: contact@qrbusinesscard.com
-- Website: https://qrbusinesscard.com
+- Email: 1dap2xoe@gmail.com
+- GitHub: [@nda-1311](https://github.com/nda-1311)
+- Repository: [QR-Digital-Business-Card](https://github.com/nda-1311/QR-Digital-Business-Card)
 
 ---
 
-**Made with ❤️ by QR Business Card Team**
+**Made with ❤️ by Nguyễn Đức Anh**
