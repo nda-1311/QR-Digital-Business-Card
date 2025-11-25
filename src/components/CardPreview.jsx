@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import QRCode from "qrcode.react";
+import { QRCodeCanvas } from "qrcode.react";
 import html2canvas from "html2canvas";
 import {
   FaFacebook,
@@ -174,7 +174,7 @@ const CardPreview = ({ cardData }) => {
                   isDarkMode ? "bg-white" : "bg-gray-50"
                 }`}
               >
-                <QRCode
+                <QRCodeCanvas
                   value={cardUrl}
                   size={200}
                   level="H"

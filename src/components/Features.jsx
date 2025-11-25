@@ -1,10 +1,10 @@
 import React from "react";
-import { FaLightning, FaShieldAlt, FaMobile, FaDownload } from "react-icons/fa";
+import { FaBolt, FaShieldAlt, FaMobile, FaDownload } from "react-icons/fa";
 
 const Features = () => {
   const features = [
     {
-      icon: <FaLightning className="text-4xl" />,
+      icon: <FaBolt className="text-4xl" />,
       title: "Siêu Nhanh",
       description: "Tạo danh thiếp trong 10 giây, không cần đăng ký",
       color: "from-yellow-400 to-orange-500",
