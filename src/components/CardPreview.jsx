@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import html2canvas from "html2canvas";
 import {
@@ -16,12 +16,23 @@ import {
 const CardPreview = ({ cardData }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [cardId, setCardId] = useState("");
   const cardRef = useRef(null);
 
+  // Tạo ID duy nhất và lưu vào localStorage
+  useEffect(() => {
+    const id = cardData.name.replace(/\s+/g, "-").toLowerCase() + "-" + Date.now();
+    setCardId(id);
+    
+    // Lưu vào localStorage
+    const savedCards = localStorage.getItem("businessCards");
+    const cards = savedCards ? JSON.parse(savedCards) : {};
+    cards[id] = cardData;
+    localStorage.setItem("businessCards", JSON.stringify(cards));
+  }, [cardData]);
+
   // Generate unique URL for the card
-  const cardUrl = `${window.location.origin}/card/${encodeURIComponent(
-    cardData.name.replace(/\s+/g, "-").toLowerCase()
-  )}`;
+  const cardUrl = `${window.location.origin}/QR-Digital-Business-Card/card/${cardId}`;
 
   const downloadCard = async () => {
     if (cardRef.current) {
