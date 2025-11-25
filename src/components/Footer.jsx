@@ -61,11 +61,11 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-4">Liên Hệ</h4>
             <div className="space-y-3 text-gray-400">
               <a
-                href="mailto:contact@qrbusinesscard.com"
+                href="mailto:1dap2xoe@gmail.com"
                 className="flex items-center gap-2 hover:text-primary transition-colors duration-300"
               >
                 <FaEnvelope />
-                contact@qrbusinesscard.com
+                1dap2xoe@gmail.com
               </a>
               <div className="flex gap-4 mt-4">
                 <a
@@ -88,8 +88,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-700 pt-8 text-center text-gray-400">
           <p className="flex items-center justify-center gap-2">
-            Made with <FaHeart className="text-red-500" /> by QR Business Card
-            Team © 2024
+            Made with <FaHeart className="text-red-500" /> by Nguyễn Đức Anh © 2024
           </p>
           <p className="mt-2 text-sm">Miễn phí 100% - Không giới hạn sử dụng</p>
         </div>

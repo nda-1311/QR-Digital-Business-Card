@@ -57,13 +57,13 @@ const Hero = () => {
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-20 h-20 bg-white rounded-full"></div>
                 <div>
-                  <h3 className="text-2xl font-bold">Nguyễn Văn A</h3>
-                  <p className="text-white/80">CEO & Founder</p>
+                  <h3 className="text-2xl font-bold">Nguyễn Đức Anh</h3>
+                  <p className="text-white/80">Developer</p>
                 </div>
               </div>
               <div className="space-y-2 text-sm">
-                <p>📧 contact@example.com</p>
-                <p>📱 +84 123 456 789</p>
+                <p>📧 1dap2xoe@gmail.com</p>
+                <p>📱 0358102981</p>
               </div>
             </div>
 
