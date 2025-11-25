@@ -15,7 +15,36 @@ const CardView = () => {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    // Lấy dữ liệu từ localStorage
+    // Decode dữ liệu từ URL query parameter
+    const decodeCardData = (encoded) => {
+      try {
+        const decoded = decodeURIComponent(atob(encoded));
+        return JSON.parse(decoded);
+      } catch (error) {
+        console.error("Error decoding card data:", error);
+        return null;
+      }
+    };
+
+    // Lấy data từ URL query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const encodedData = urlParams.get('data');
+    
+    if (encodedData) {
+      // Ưu tiên dữ liệu từ URL
+      const decodedData = decodeCardData(encodedData);
+      if (decodedData) {
+        setCardData(decodedData);
+        // Lưu vào localStorage cho lần sau
+        const savedCards = localStorage.getItem("businessCards");
+        const cards = savedCards ? JSON.parse(savedCards) : {};
+        cards[cardId] = decodedData;
+        localStorage.setItem("businessCards", JSON.stringify(cards));
+        return;
+      }
+    }
+
+    // Fallback: Lấy dữ liệu từ localStorage
     const savedCards = localStorage.getItem("businessCards");
     if (savedCards) {
       const cards = JSON.parse(savedCards);

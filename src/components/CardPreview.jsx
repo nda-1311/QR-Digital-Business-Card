@@ -26,15 +26,21 @@ const CardPreview = ({ cardData }) => {
       cardData.name.replace(/\s+/g, "-").toLowerCase() + "-" + Date.now();
     setCardId(id);
 
-    // Lưu vào localStorage
+    // Lưu vào localStorage (backup)
     const savedCards = localStorage.getItem("businessCards");
     const cards = savedCards ? JSON.parse(savedCards) : {};
     cards[id] = cardData;
     localStorage.setItem("businessCards", JSON.stringify(cards));
   }, [cardData]);
 
-  // Generate unique URL for the card
-  const cardUrl = `${window.location.origin}/QR-Digital-Business-Card/card/${cardId}`;
+  // Encode dữ liệu vào URL để chia sẻ được
+  const encodeCardData = (data) => {
+    const jsonString = JSON.stringify(data);
+    return btoa(encodeURIComponent(jsonString));
+  };
+
+  // Generate unique URL for the card với dữ liệu được encode
+  const cardUrl = `${window.location.origin}/QR-Digital-Business-Card/card/${cardId}?data=${encodeCardData(cardData)}`;
 
   const downloadCard = async () => {
     if (cardRef.current) {
