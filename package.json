@@ -2,6 +2,7 @@
   "name": "qr-business-card",
   "version": "1.0.0",
   "private": true,
+  "homepage": "https://nda-1311.github.io/QR-Digital-Business-Card",
   "dependencies": {
     "html2canvas": "^1.4.1",
     "qrcode.react": "^4.2.0",
@@ -12,6 +13,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.17",
+    "gh-pages": "^6.3.0",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1"
   },
@@ -19,7 +21,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
