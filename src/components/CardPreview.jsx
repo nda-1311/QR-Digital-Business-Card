@@ -60,7 +60,7 @@ const CardPreview = ({ cardData }) => {
   const downloadCard = async () => {
     if (cardRef.current && !isDownloading) {
       setIsDownloading(true);
-      
+
       try {
         // Kiểm tra cache trước
         if (cachedImage) {
@@ -70,12 +70,12 @@ const CardPreview = ({ cardData }) => {
         }
 
         console.log("Bắt đầu tạo ảnh...");
-        
+
         // Đợi fonts và ảnh load xong
         await document.fonts.ready;
-        
+
         // Preload avatar nếu có
-        if (cardData.avatar && !cardData.avatar.startsWith('data:')) {
+        if (cardData.avatar && !cardData.avatar.startsWith("data:")) {
           await new Promise((resolve, reject) => {
             const img = new Image();
             img.crossOrigin = "anonymous";
@@ -84,11 +84,11 @@ const CardPreview = ({ cardData }) => {
             img.src = cardData.avatar;
           });
         }
-        
+
         await new Promise((resolve) => setTimeout(resolve, 200));
-        
+
         console.log("Đang render canvas...");
-        
+
         const canvas = await html2canvas(cardRef.current, {
           backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
           scale: 2.5, // Giảm xuống 2.5 để cân bằng giữa quality và tốc độ
@@ -103,68 +103,78 @@ const CardPreview = ({ cardData }) => {
           windowWidth: cardRef.current.offsetWidth,
           windowHeight: cardRef.current.offsetHeight,
           onclone: (clonedDoc) => {
-            const clonedCard = clonedDoc.querySelector('[data-card-ref]');
+            const clonedCard = clonedDoc.querySelector("[data-card-ref]");
             if (clonedCard) {
               // Đảm bảo card có border-radius
-              clonedCard.style.borderRadius = '24px';
-              clonedCard.style.overflow = 'hidden';
+              clonedCard.style.borderRadius = "24px";
+              clonedCard.style.overflow = "hidden";
             }
-            
+
             // Fix QR background
-            const qrContainer = clonedDoc.querySelector('[data-qr-container]');
+            const qrContainer = clonedDoc.querySelector("[data-qr-container]");
             if (qrContainer) {
-              qrContainer.style.backgroundColor = isDarkMode ? '#374151' : '#f9fafb';
-              qrContainer.style.borderRadius = '12px';
-              qrContainer.style.padding = '24px';
+              qrContainer.style.backgroundColor = isDarkMode
+                ? "#374151"
+                : "#f9fafb";
+              qrContainer.style.borderRadius = "12px";
+              qrContainer.style.padding = "24px";
             }
-            
+
             // Fix avatar
-            const clonedAvatarImg = clonedDoc.querySelector('img[alt="' + cardData.name + '"]');
+            const clonedAvatarImg = clonedDoc.querySelector(
+              'img[alt="' + cardData.name + '"]'
+            );
             if (clonedAvatarImg) {
               const parentDiv = clonedAvatarImg.parentElement;
               if (parentDiv) {
-                parentDiv.style.width = '96px';
-                parentDiv.style.height = '96px';
-                parentDiv.style.borderRadius = '50%';
-                parentDiv.style.overflow = 'hidden';
-                parentDiv.style.display = 'flex';
-                parentDiv.style.alignItems = 'center';
-                parentDiv.style.justifyContent = 'center';
-                parentDiv.style.backgroundColor = isDarkMode ? '#374151' : '#f3f4f6';
-                parentDiv.style.border = '4px solid #7ACFF5';
+                parentDiv.style.width = "96px";
+                parentDiv.style.height = "96px";
+                parentDiv.style.borderRadius = "50%";
+                parentDiv.style.overflow = "hidden";
+                parentDiv.style.display = "flex";
+                parentDiv.style.alignItems = "center";
+                parentDiv.style.justifyContent = "center";
+                parentDiv.style.backgroundColor = isDarkMode
+                  ? "#374151"
+                  : "#f3f4f6";
+                parentDiv.style.border = "4px solid #7ACFF5";
               }
-              clonedAvatarImg.style.width = '100%';
-              clonedAvatarImg.style.height = '100%';
-              clonedAvatarImg.style.objectFit = 'cover';
+              clonedAvatarImg.style.width = "100%";
+              clonedAvatarImg.style.height = "100%";
+              clonedAvatarImg.style.objectFit = "cover";
             }
-          }
+          },
         });
 
         console.log("Canvas đã render:", canvas.width, "x", canvas.height);
 
         // Tên file
-        const fileName = `business-card-${cardData.name.replace(/\s+/g, "-").toLowerCase()}.png`;
+        const fileName = `business-card-${cardData.name
+          .replace(/\s+/g, "-")
+          .toLowerCase()}.png`;
 
         // Chuyển thành blob
-        canvas.toBlob((blob) => {
-          if (!blob) {
-            console.error("Không thể tạo blob");
-            alert("Không thể tạo ảnh. Vui lòng thử lại!");
-            setIsDownloading(false);
-            return;
-          }
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              console.error("Không thể tạo blob");
+              alert("Không thể tạo ảnh. Vui lòng thử lại!");
+              setIsDownloading(false);
+              return;
+            }
 
-          console.log("Blob created:", blob.size, "bytes");
+            console.log("Blob created:", blob.size, "bytes");
 
-          // Lưu vào cache
-          const url = URL.createObjectURL(blob);
-          setCachedImage({ url, fileName, blob });
-          
-          // Download
-          triggerDownload(url, fileName);
-          
-        }, "image/png", 1.0);
-        
+            // Lưu vào cache
+            const url = URL.createObjectURL(blob);
+            setCachedImage({ url, fileName, blob });
+
+            // Download
+            triggerDownload(url, fileName);
+          },
+          "image/png",
+          1.0
+        );
       } catch (error) {
         console.error("LỖI CHI TIẾT:", error);
         setIsDownloading(false);
@@ -187,12 +197,12 @@ const CardPreview = ({ cardData }) => {
     link.download = fileName;
     link.style.position = "fixed";
     link.style.left = "-9999px";
-    
+
     document.body.appendChild(link);
     link.click();
-    
+
     console.log("Download triggered");
-    
+
     setTimeout(() => {
       document.body.removeChild(link);
       setIsDownloading(false);
@@ -264,9 +274,11 @@ const CardPreview = ({ cardData }) => {
               {/* Header with Avatar */}
               <div className="flex items-center gap-6 mb-6">
                 {cardData.avatar ? (
-                  <div className={`w-24 h-24 rounded-full overflow-hidden border-4 border-primary shadow-lg flex-shrink-0 flex items-center justify-center ${
-                    isDarkMode ? "bg-gray-700" : "bg-gray-100"
-                  }`}>
+                  <div
+                    className={`w-24 h-24 rounded-full overflow-hidden border-4 border-primary shadow-lg flex-shrink-0 flex items-center justify-center ${
+                      isDarkMode ? "bg-gray-700" : "bg-gray-100"
+                    }`}
+                  >
                     <img
                       src={cardData.avatar}
                       alt={cardData.name}
@@ -279,8 +291,14 @@ const CardPreview = ({ cardData }) => {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-2xl font-bold mb-1 break-words">{cardData.name}</h3>
-                  <p className={`break-words ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                  <h3 className="text-2xl font-bold mb-1 break-words">
+                    {cardData.name}
+                  </h3>
+                  <p
+                    className={`break-words ${
+                      isDarkMode ? "text-gray-300" : "text-gray-600"
+                    }`}
+                  >
                     {cardData.position}
                   </p>
                 </div>
@@ -289,22 +307,18 @@ const CardPreview = ({ cardData }) => {
               {/* Contact Info */}
               <div className="space-y-3 mb-6">
                 <div className="flex items-center gap-3">
-                  <FaEnvelope 
+                  <FaEnvelope
                     className="text-primary flex-shrink-0"
                     style={{ fontSize: "16px", minWidth: "16px" }}
                   />
-                  <span className="text-sm">
-                    {cardData.email}
-                  </span>
+                  <span className="text-sm">{cardData.email}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <FaPhone 
+                  <FaPhone
                     className="text-primary flex-shrink-0"
                     style={{ fontSize: "16px", minWidth: "16px" }}
                   />
-                  <span className="text-sm">
-                    {cardData.phone}
-                  </span>
+                  <span className="text-sm">{cardData.phone}</span>
                 </div>
               </div>
 
@@ -406,8 +420,8 @@ const CardPreview = ({ cardData }) => {
                 </button>
               )}
               <p className="text-xs text-gray-500 mt-2 text-center">
-                {cachedImage 
-                  ? "✅ Ảnh đã sẵn sàng - Tải xuống ngay lập tức!" 
+                {cachedImage
+                  ? "✅ Ảnh đã sẵn sàng - Tải xuống ngay lập tức!"
                   : "⏱️ Lần đầu sẽ mất vài giây, sau đó tải ngay"}
               </p>
             </div>

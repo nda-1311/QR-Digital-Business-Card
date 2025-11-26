@@ -59,7 +59,7 @@ const FormSection = ({ onSubmit }) => {
       try {
         // Bước 1: Tạo preview nhanh từ file (hiển thị ngay lập tức)
         const objectUrl = URL.createObjectURL(file);
-        
+
         // Tạo thumbnail ngay lập tức để hiển thị
         const quickPreview = await createQuickThumbnail(file);
         setFormData((prev) => ({
@@ -84,7 +84,7 @@ const FormSection = ({ onSubmit }) => {
         if (data.success) {
           // Lưu URL cloud (quality cao hơn)
           const cloudUrl = data.data.url;
-          
+
           // Cache URL này
           setImageCache({
             original: file.name,
@@ -97,7 +97,7 @@ const FormSection = ({ onSubmit }) => {
             ...prev,
             avatar: cloudUrl,
           }));
-          
+
           // Cleanup object URL
           URL.revokeObjectURL(objectUrl);
         } else {
