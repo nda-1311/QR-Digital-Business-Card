@@ -18,6 +18,8 @@ const CardPreview = ({ cardData }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [copied, setCopied] = useState(false);
   const [cardId, setCardId] = useState("");
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [cachedImage, setCachedImage] = useState(null);
   const cardRef = useRef(null);
 
   // Tạo ID duy nhất và lưu vào localStorage
@@ -33,6 +35,15 @@ const CardPreview = ({ cardData }) => {
     localStorage.setItem("businessCards", JSON.stringify(cards));
   }, [cardData]);
 
+  // Clear cache khi đổi theme
+  useEffect(() => {
+    if (cachedImage) {
+      URL.revokeObjectURL(cachedImage.url);
+      setCachedImage(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDarkMode]);
+
   // Encode dữ liệu - GIỮ CẢ AVATAR (đã được resize/nén nhỏ)
   const encodeCardData = (data) => {
     const jsonString = JSON.stringify(data);
@@ -47,57 +58,146 @@ const CardPreview = ({ cardData }) => {
   }/QR-Digital-Business-Card/card/${cardId}#${encodeCardData(cardData)}`;
 
   const downloadCard = async () => {
-    if (cardRef.current) {
-      // Đảm bảo fonts đã load xong
-      await document.fonts.ready;
-      await new Promise((resolve) => setTimeout(resolve, 200));
+    if (cardRef.current && !isDownloading) {
+      setIsDownloading(true);
+      
+      try {
+        // Kiểm tra cache trước
+        if (cachedImage) {
+          console.log("Sử dụng ảnh từ cache");
+          downloadFromCache();
+          return;
+        }
 
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        windowWidth: cardRef.current.scrollWidth,
-        windowHeight: cardRef.current.scrollHeight,
-        onclone: (clonedDoc) => {
-          const clonedElement = clonedDoc.querySelector("[data-card-ref]");
-          if (clonedElement) {
-            clonedElement.style.transform = "none";
-            clonedElement.style.transition = "none";
-
-            // Thay thế icons bằng text symbols để render tốt hơn
-            const emailIcon = clonedElement.querySelector(
-              '[data-icon="email"]'
-            );
-            const phoneIcon = clonedElement.querySelector(
-              '[data-icon="phone"]'
-            );
-
-            if (emailIcon) {
-              emailIcon.innerHTML = "✉";
-              emailIcon.style.fontFamily = "Arial, sans-serif";
-              emailIcon.style.fontSize = "18px";
-              emailIcon.style.lineHeight = "20px";
+        console.log("Bắt đầu tạo ảnh...");
+        
+        // Đợi fonts và ảnh load xong
+        await document.fonts.ready;
+        
+        // Preload avatar nếu có
+        if (cardData.avatar && !cardData.avatar.startsWith('data:')) {
+          await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = resolve;
+            img.onerror = resolve; // Vẫn tiếp tục nếu lỗi
+            img.src = cardData.avatar;
+          });
+        }
+        
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        
+        console.log("Đang render canvas...");
+        
+        const canvas = await html2canvas(cardRef.current, {
+          backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
+          scale: 2.5, // Giảm xuống 2.5 để cân bằng giữa quality và tốc độ
+          useCORS: true,
+          allowTaint: false,
+          logging: false,
+          foreignObjectRendering: false,
+          imageTimeout: 15000, // Tăng timeout cho ảnh
+          // Đặt width/height cụ thể để tránh méo
+          width: cardRef.current.offsetWidth,
+          height: cardRef.current.offsetHeight,
+          windowWidth: cardRef.current.offsetWidth,
+          windowHeight: cardRef.current.offsetHeight,
+          onclone: (clonedDoc) => {
+            const clonedCard = clonedDoc.querySelector('[data-card-ref]');
+            if (clonedCard) {
+              // Đảm bảo card có border-radius
+              clonedCard.style.borderRadius = '24px';
+              clonedCard.style.overflow = 'hidden';
             }
-
-            if (phoneIcon) {
-              phoneIcon.innerHTML = "☎";
-              phoneIcon.style.fontFamily = "Arial, sans-serif";
-              phoneIcon.style.fontSize = "18px";
-              phoneIcon.style.lineHeight = "20px";
+            
+            // Fix QR background
+            const qrContainer = clonedDoc.querySelector('[data-qr-container]');
+            if (qrContainer) {
+              qrContainer.style.backgroundColor = isDarkMode ? '#374151' : '#f9fafb';
+              qrContainer.style.borderRadius = '12px';
+              qrContainer.style.padding = '24px';
+            }
+            
+            // Fix avatar
+            const clonedAvatarImg = clonedDoc.querySelector('img[alt="' + cardData.name + '"]');
+            if (clonedAvatarImg) {
+              const parentDiv = clonedAvatarImg.parentElement;
+              if (parentDiv) {
+                parentDiv.style.width = '96px';
+                parentDiv.style.height = '96px';
+                parentDiv.style.borderRadius = '50%';
+                parentDiv.style.overflow = 'hidden';
+                parentDiv.style.display = 'flex';
+                parentDiv.style.alignItems = 'center';
+                parentDiv.style.justifyContent = 'center';
+                parentDiv.style.backgroundColor = isDarkMode ? '#374151' : '#f3f4f6';
+                parentDiv.style.border = '4px solid #7ACFF5';
+              }
+              clonedAvatarImg.style.width = '100%';
+              clonedAvatarImg.style.height = '100%';
+              clonedAvatarImg.style.objectFit = 'cover';
             }
           }
-        },
-      });
+        });
 
-      const link = document.createElement("a");
-      link.download = `business-card-${cardData.name
-        .replace(/\s+/g, "-")
-        .toLowerCase()}.png`;
-      link.href = canvas.toDataURL("image/png", 1.0);
-      link.click();
+        console.log("Canvas đã render:", canvas.width, "x", canvas.height);
+
+        // Tên file
+        const fileName = `business-card-${cardData.name.replace(/\s+/g, "-").toLowerCase()}.png`;
+
+        // Chuyển thành blob
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            console.error("Không thể tạo blob");
+            alert("Không thể tạo ảnh. Vui lòng thử lại!");
+            setIsDownloading(false);
+            return;
+          }
+
+          console.log("Blob created:", blob.size, "bytes");
+
+          // Lưu vào cache
+          const url = URL.createObjectURL(blob);
+          setCachedImage({ url, fileName, blob });
+          
+          // Download
+          triggerDownload(url, fileName);
+          
+        }, "image/png", 1.0);
+        
+      } catch (error) {
+        console.error("LỖI CHI TIẾT:", error);
+        setIsDownloading(false);
+        alert("Lỗi: " + (error.message || "Không xác định"));
+      }
     }
+  };
+
+  // Download từ cache
+  const downloadFromCache = () => {
+    if (cachedImage) {
+      triggerDownload(cachedImage.url, cachedImage.fileName);
+    }
+  };
+
+  // Helper function để trigger download
+  const triggerDownload = (url, fileName) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.style.position = "fixed";
+    link.style.left = "-9999px";
+    
+    document.body.appendChild(link);
+    link.click();
+    
+    console.log("Download triggered");
+    
+    setTimeout(() => {
+      document.body.removeChild(link);
+      setIsDownloading(false);
+      console.log("Cleanup completed");
+    }, 500);
   };
 
   const copyLink = () => {
@@ -164,19 +264,23 @@ const CardPreview = ({ cardData }) => {
               {/* Header with Avatar */}
               <div className="flex items-center gap-6 mb-6">
                 {cardData.avatar ? (
-                  <img
-                    src={cardData.avatar}
-                    alt={cardData.name}
-                    className="w-24 h-24 rounded-full object-cover border-4 border-primary shadow-lg"
-                  />
+                  <div className={`w-24 h-24 rounded-full overflow-hidden border-4 border-primary shadow-lg flex-shrink-0 flex items-center justify-center ${
+                    isDarkMode ? "bg-gray-700" : "bg-gray-100"
+                  }`}>
+                    <img
+                      src={cardData.avatar}
+                      alt={cardData.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 ) : (
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-3xl font-bold shadow-lg flex-shrink-0">
                     {cardData.name.charAt(0).toUpperCase()}
                   </div>
                 )}
-                <div className="flex-1">
-                  <h3 className="text-2xl font-bold mb-1">{cardData.name}</h3>
-                  <p className={isDarkMode ? "text-gray-300" : "text-gray-600"}>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-2xl font-bold mb-1 break-words">{cardData.name}</h3>
+                  <p className={`break-words ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
                     {cardData.position}
                   </p>
                 </div>
@@ -184,55 +288,21 @@ const CardPreview = ({ cardData }) => {
 
               {/* Contact Info */}
               <div className="space-y-3 mb-6">
-                <div
-                  className="flex items-center gap-3"
-                  style={{ alignItems: "center" }}
-                >
-                  <div
-                    data-icon="email"
-                    className="w-5 h-5 flex items-center justify-center flex-shrink-0 text-primary"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "20px",
-                      height: "20px",
-                      color: "#7ACFF5",
-                    }}
-                  >
-                    <FaEnvelope
-                      style={{ fontSize: "16px", display: "block" }}
-                    />
-                  </div>
-                  <span
-                    className="text-sm leading-5"
-                    style={{ lineHeight: "20px", fontSize: "14px" }}
-                  >
+                <div className="flex items-center gap-3">
+                  <FaEnvelope 
+                    className="text-primary flex-shrink-0"
+                    style={{ fontSize: "16px", minWidth: "16px" }}
+                  />
+                  <span className="text-sm">
                     {cardData.email}
                   </span>
                 </div>
-                <div
-                  className="flex items-center gap-3"
-                  style={{ alignItems: "center" }}
-                >
-                  <div
-                    data-icon="phone"
-                    className="w-5 h-5 flex items-center justify-center flex-shrink-0 text-primary"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "20px",
-                      height: "20px",
-                      color: "#7ACFF5",
-                    }}
-                  >
-                    <FaPhone style={{ fontSize: "16px", display: "block" }} />
-                  </div>
-                  <span
-                    className="text-sm leading-5"
-                    style={{ lineHeight: "20px", fontSize: "14px" }}
-                  >
+                <div className="flex items-center gap-3">
+                  <FaPhone 
+                    className="text-primary flex-shrink-0"
+                    style={{ fontSize: "16px", minWidth: "16px" }}
+                  />
+                  <span className="text-sm">
                     {cardData.phone}
                   </span>
                 </div>
@@ -276,9 +346,13 @@ const CardPreview = ({ cardData }) => {
 
               {/* QR Code */}
               <div
+                data-qr-container
                 className={`rounded-xl p-6 flex justify-center ${
-                  isDarkMode ? "bg-white" : "bg-gray-50"
+                  isDarkMode ? "bg-gray-700" : "bg-gray-50"
                 }`}
+                style={{
+                  backgroundColor: isDarkMode ? "#374151" : "#f9fafb",
+                }}
               >
                 <QRCodeCanvas
                   value={cardUrl}
@@ -286,7 +360,7 @@ const CardPreview = ({ cardData }) => {
                   level="H"
                   includeMargin={true}
                   fgColor="#000000"
-                  bgColor="#ffffff"
+                  bgColor="transparent"
                 />
               </div>
             </div>
@@ -302,10 +376,40 @@ const CardPreview = ({ cardData }) => {
               </h3>
               <button
                 onClick={downloadCard}
-                className="w-full bg-gradient-to-r from-primary to-secondary text-white px-6 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                disabled={isDownloading}
+                className={`w-full text-white px-6 py-4 rounded-xl font-semibold shadow-lg transition-all duration-300 ${
+                  isDownloading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-primary to-secondary hover:shadow-xl transform hover:scale-105"
+                }`}
               >
-                💾 Tải Danh Thiếp (PNG)
+                {isDownloading ? (
+                  <>
+                    <span className="inline-block animate-spin mr-2">⏳</span>
+                    Đang xử lý...
+                  </>
+                ) : cachedImage ? (
+                  <>⚡ Tải Nhanh (Đã Cache)</>
+                ) : (
+                  <>💾 Tải Danh Thiếp (PNG)</>
+                )}
               </button>
+              {cachedImage && (
+                <button
+                  onClick={() => {
+                    URL.revokeObjectURL(cachedImage.url);
+                    setCachedImage(null);
+                  }}
+                  className="w-full mt-3 text-gray-600 px-4 py-2 rounded-xl border-2 border-gray-300 hover:bg-gray-100 transition-all duration-300 text-sm"
+                >
+                  🔄 Tạo Lại Ảnh
+                </button>
+              )}
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                {cachedImage 
+                  ? "✅ Ảnh đã sẵn sàng - Tải xuống ngay lập tức!" 
+                  : "⏱️ Lần đầu sẽ mất vài giây, sau đó tải ngay"}
+              </p>
             </div>
 
             {/* Copy Link */}

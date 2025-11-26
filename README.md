@@ -123,30 +123,35 @@ qr-business-card/
 ## 🔥 Tính Năng Kỹ Thuật Nổi Bật
 
 ### 1. Cloud Image Storage
+
 - Upload avatar lên ImgBB cloud
 - Không giới hạn dung lượng
 - Fallback: auto resize + base64 nếu upload thất bại
 - File size check: max 5MB
 
 ### 2. Data Compression & Encoding
+
 - Nén dữ liệu bằng `lz-string`
 - Encode trong hash fragment (#) thay vì query (?)
 - URL ngắn gọn hơn 70% so với base64 thông thường
 - Support avatar URL từ cloud
 
 ### 3. QR Code Sharing
+
 - Dữ liệu được embed trực tiếp vào QR
 - Quét QR từ bất kỳ thiết bị nào
 - Hiển thị đầy đủ thông tin kể cả avatar
 - Không cần server/database
 
 ### 4. PNG Export với Icon Perfect Alignment
+
 - Unicode symbols (✉ ☎) thay thế SVG icons khi export
 - Đảm bảo icons căn chỉnh hoàn hảo trong ảnh
 - Scale 3x cho chất lượng cao
 - Chờ fonts load hoàn toàn trước khi render
 
 ### 5. Scroll to Top on Route Change
+
 - Tự động scroll lên đầu khi navigate
 - Smooth user experience
 - Xử lý đúng với hash routing
@@ -164,12 +169,14 @@ qr-business-card/
 ### Tạo Danh Thiếp Mới
 
 1. **Nhập thông tin cơ bản**
+
    - Họ tên (bắt buộc)
    - Chức vụ (bắt buộc)
    - Email (bắt buộc, validate format)
    - Số điện thoại (bắt buộc)
 
 2. **Upload Avatar**
+
    - Click "Chọn Ảnh"
    - Chọn file ảnh (max 5MB)
    - Ảnh tự động upload lên ImgBB cloud
@@ -177,6 +184,7 @@ qr-business-card/
    - Nếu thất bại: tự động resize & nén base64
 
 3. **Thêm Mạng Xã Hội (tùy chọn)**
+
    - Facebook URL
    - LinkedIn URL
    - Website URL
@@ -190,12 +198,14 @@ qr-business-card/
 ### Chia Sẻ & Export
 
 1. **📥 Tải PNG**
+
    - Click "Tải Danh Thiếp (PNG)"
    - Icons tự động chuyển sang Unicode
    - Ảnh chất lượng cao (scale 3x)
    - Download tự động
 
 2. **🔗 Chia Sẻ Link**
+
    - Click "Sao Chép" để copy link
    - Dữ liệu đã được nén trong URL
    - Gửi qua email, chat, social media
@@ -217,16 +227,19 @@ qr-business-card/
 ## 🐛 Troubleshooting
 
 **Q: Upload ảnh bị lỗi?**
+
 - Kiểm tra kích thước file (< 5MB)
 - Kiểm tra API key ImgBB có đúng không
 - Hệ thống tự động fallback sang base64
 
 **Q: QR code không quét được?**
+
 - Đảm bảo đã deploy code mới nhất
 - Check console log để xem lỗi decode
 - Thử tạo danh thiếp mới
 
 **Q: Ảnh export bị lệch icons?**
+
 - Đã fix bằng Unicode symbols
 - Chờ 200ms để fonts load
 
@@ -246,6 +259,7 @@ MIT License - Sử dụng miễn phí cho mọi mục đích
 ## 👨‍💻 Author
 
 **Nguyen Duc Anh**
+
 - GitHub: [@nda-1311](https://github.com/nda-1311)
 - Email: 1dap2xoe@gmail.com
 

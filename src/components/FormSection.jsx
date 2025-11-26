@@ -27,6 +27,7 @@ const FormSection = ({ onSubmit }) => {
 
   const [errors, setErrors] = useState({});
   const [uploading, setUploading] = useState(false);
+  const [imageCache, setImageCache] = useState(null); // Cache cho ảnh đã resize
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,82 +57,101 @@ const FormSection = ({ onSubmit }) => {
       }
 
       try {
-        // Upload lên ImgBB
-        const formData = new FormData();
-        formData.append("image", file);
+        // Bước 1: Tạo preview nhanh từ file (hiển thị ngay lập tức)
+        const objectUrl = URL.createObjectURL(file);
+        
+        // Tạo thumbnail ngay lập tức để hiển thị
+        const quickPreview = await createQuickThumbnail(file);
+        setFormData((prev) => ({
+          ...prev,
+          avatar: quickPreview, // Hiển thị ngay
+        }));
+
+        // Bước 2: Upload lên ImgBB (chạy background)
+        const uploadFormData = new FormData();
+        uploadFormData.append("image", file);
 
         const response = await fetch(
           `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
           {
             method: "POST",
-            body: formData,
+            body: uploadFormData,
           }
         );
 
         const data = await response.json();
 
         if (data.success) {
-          // Lưu URL của ảnh thay vì base64
+          // Lưu URL cloud (quality cao hơn)
+          const cloudUrl = data.data.url;
+          
+          // Cache URL này
+          setImageCache({
+            original: file.name,
+            cloudUrl: cloudUrl,
+            thumbnail: quickPreview,
+          });
+
+          // Cập nhật với URL cloud
           setFormData((prev) => ({
             ...prev,
-            avatar: data.data.url,
+            avatar: cloudUrl,
           }));
+          
+          // Cleanup object URL
+          URL.revokeObjectURL(objectUrl);
         } else {
-          // Nếu upload thất bại, dùng base64 thay thế (fallback)
-          console.error("ImgBB upload failed, using base64 fallback");
-          convertToBase64Fallback(file);
+          // Giữ nguyên thumbnail nếu upload fail
+          console.error("ImgBB upload failed, keeping thumbnail");
         }
       } catch (error) {
         console.error("Error uploading to ImgBB:", error);
-        // Fallback: Dùng base64
-        convertToBase64Fallback(file);
+        // Thumbnail đã được set, không cần làm gì thêm
       } finally {
         setUploading(false);
       }
     }
   };
 
-  // Fallback: Resize và lưu base64 nếu upload cloud thất bại
-  const convertToBase64Fallback = (file) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const MAX_SIZE = 150;
+  // Tạo thumbnail nhanh chóng từ file
+  const createQuickThumbnail = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_SIZE = 200; // Tăng size để quality tốt hơn
 
-        let width = img.width;
-        let height = img.height;
+          let width = img.width;
+          let height = img.height;
 
-        if (width > height) {
-          if (width > MAX_SIZE) {
-            height *= MAX_SIZE / width;
-            width = MAX_SIZE;
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
           }
-        } else {
-          if (height > MAX_SIZE) {
-            width *= MAX_SIZE / height;
-            height = MAX_SIZE;
-          }
-        }
 
-        canvas.width = width;
-        canvas.height = height;
+          canvas.width = width;
+          canvas.height = height;
 
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
 
-        // Nén ảnh với chất lượng thấp
-        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.5);
-
-        setFormData((prev) => ({
-          ...prev,
-          avatar: compressedBase64,
-        }));
+          // Quality 0.8 cho thumbnail tốt hơn
+          const thumbnail = canvas.toDataURL("image/jpeg", 0.8);
+          resolve(thumbnail);
+        };
+        img.src = reader.result;
       };
-      img.src = reader.result;
-    };
-    reader.readAsDataURL(file);
+      reader.readAsDataURL(file);
+    });
   };
 
   const validateForm = () => {
