@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/QR-Digital-Business-Card/static/css/main.67b7cd5f.css",
-    "main.js": "/QR-Digital-Business-Card/static/js/main.145dcabe.js",
+    "main.css": "/QR-Digital-Business-Card/static/css/main.3d2f61a8.css",
+    "main.js": "/QR-Digital-Business-Card/static/js/main.36a6e525.js",
     "index.html": "/QR-Digital-Business-Card/index.html",
-    "main.67b7cd5f.css.map": "/QR-Digital-Business-Card/static/css/main.67b7cd5f.css.map",
-    "main.145dcabe.js.map": "/QR-Digital-Business-Card/static/js/main.145dcabe.js.map"
+    "main.3d2f61a8.css.map": "/QR-Digital-Business-Card/static/css/main.3d2f61a8.css.map",
+    "main.36a6e525.js.map": "/QR-Digital-Business-Card/static/js/main.36a6e525.js.map"
   },
   "entrypoints": [
-    "static/css/main.67b7cd5f.css",
-    "static/js/main.145dcabe.js"
+    "static/css/main.3d2f61a8.css",
+    "static/js/main.36a6e525.js"
   ]
 }
